@@ -1,7 +1,7 @@
 from flask import jsonify, abort
 from flask_restful import Resource, reqparse
 import logging
-from clusterCommands import *
+from pgapi.clusterCommands import *
 
 class Cluster(Resource):
     _states = ["start", "stop", "restart", "reload", "promote", "status"]

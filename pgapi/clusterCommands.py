@@ -85,7 +85,7 @@ def cluster_ctl(version, name, action):
     """Control a existing cluster.
     """
     if not action in CTL_ALLOWED_ACTIONS:
-        raise "Action has to be one of %s" % allowed_actions
+        raise Exception("Action has to be one of %s" % (str(CTL_ALLOWED_ACTIONS ) ))
 
     config = helper.Config.getInstance()
 
@@ -94,7 +94,7 @@ def cluster_ctl(version, name, action):
         options == "-f"
 
     sudo = ""
-    if config.getSetting("bypass_systemd") is False:
+    if config.getSetting("bypass_systemd") is True:
         sudo = "sudo "
 
     (returncode, stdout, stderr) = _run_command('{}pg_ctlcluster {} {} {} {}'.format(sudo, version, name, action, options))
@@ -106,7 +106,7 @@ def cluster_create(version, name, opts=None):
     cmd = 'pg_createcluster %s %s' % (version, name)
 
     if opts is not None:
-        for key, value in opts.iteritems():
+        for key, value in opts.items():
             cmd += ' --%s=%s' % (key, value)
 
     (returncode, stdout, stderr) = _run_command(cmd)
@@ -143,6 +143,8 @@ def cluster_get_all():
         logging.error("Clusterlisting reports an error. %s"%( stderr.strip() ) )
 
     try:
+        if stdout == '':
+            raise
         clusters = _json_loads_wrapper(stdout,command) #Critical section. Likely to raise errors
     except Exception as e:
         return _error_to_json( e ) 
