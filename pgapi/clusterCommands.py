@@ -1,13 +1,33 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import subprocess
 import json
 import logging
+import traceback
 
 from pgapi import helper
 
 CTL_ALLOWED_ACTIONS = ["start", "stop", "restart", "reload", "promote", "status"]
+
+
+def _json_loads_wrapper(string, command='unnamed command'):
+    try:
+        _json = json.loads(string)
+    except Exception as e:
+        logging.error( "%s::%s"%( command, e ) )
+        # Something broke around here. We'll catch the error to provide a stable api.
+        # To allow for some debugging, we'll print the stacktrace anyhow.
+        logging.error( traceback.print_exc() )
+        raise Exception("%s output is not valid json."%(command) )
+    return _json
+
+def _error_to_json( message ):
+    error=dict()
+    error['Error'] = str(message)
+    return json.dumps(error)
+
 
 def sudo_prefix():
     """returns a sudo prefix
@@ -27,8 +47,12 @@ def _run_command(command):
     """Run a give command.
     The command is check against a specific regex to ensure it's safe
     to execute. See command_is_safe().
+    As commandoutput will always be reinterpreted we'll ensure maximum compatibility
+    via LC_ALL=C.
     """
     logging.debug("request to execute \"%s\"", command)
+    subprocess_env = dict( os.environ )
+    subprocess_env['LC_ALL'] = 'C'
     # forbid unsafe commands. This one needs some love.
     if not helper.command_is_safe(command):
         logging.error("denail to execute command \"%s\". It's considered unsave.", command)
@@ -38,12 +62,20 @@ def _run_command(command):
     config = helper.Config.getInstance()
     encoding = config.getSetting("encoding")
     
-    # prefix with sudo
+    # prefix with sudo and locale
     command = "{} {}".format(sudo_prefix(), command)
     logging.info("execute command \"%s\"", command)
-
-    proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding)
-    (stdout, stderr) = proc.communicate()
+    try:
+        ## As of python 3.6, 'encoding' is a valid argument for subprocess.
+        ## To achieve compatibility to earlier versions of python we refrain from it.
+        proc = subprocess.Popen( command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=subprocess_env )
+        (stdout, stderr) = proc.communicate()
+        (stdout, stderr) = (stdout.decode( encoding ), stderr.decode( encoding ) )
+    except Exception as e:
+        logging.error("Execution of %s failed"%(command) )
+        logging.error(e)
+        traceback.print_exc()
+        raise e
     returncode = proc.returncode
     logging.debug("command retured (%d) stdout: \"%s\" stderr: \"%s\"", returncode, stdout, stderr)
 
@@ -104,12 +136,16 @@ def cluster_set_setting(version, name, setting, value):
 def cluster_get_all():
     """Returns a list of all clusters in as python list.
     """
-    (returncode, stdout, stderr) = _run_command('pg_lsclusters --json')
+    command = 'pg_lsclusters --json'
+    (returncode, stdout, stderr) = _run_command( command )
 
     if returncode != 0:
-        print("Could not get Clusters")
+        logging.error("Clusterlisting reports an error. %s"%( stderr.strip() ) )
 
-    clusters = json.loads(stdout)
+    try:
+        clusters = _json_loads_wrapper(stdout,command) #Critical section. Likely to raise errors
+    except Exception as e:
+        return _error_to_json( e ) 
     return clusters
 
 def cluster_get(version=None, name=None):
