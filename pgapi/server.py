@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_restful import Api
-from helper import Config
+from importlib import import_module
+from pgapi.helper import Config
 
 class ServerAPI(object):
 
@@ -13,7 +14,7 @@ class ServerAPI(object):
         self.server_app.add_url_rule("/", "index", self.index)
 
         for mod in ["clusterAPI"]:
-            module = __import__(mod)
+            module = import_module('pgapi.clusterAPI')
             module.registerHandlers(self.server_api)
         
     def index(self):
