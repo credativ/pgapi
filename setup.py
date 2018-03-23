@@ -28,4 +28,9 @@ setup(
     platforms='any',
     install_requires=install_requires,
     tests_requires=tests_requires,
+    entry_points={
+         'console_scripts': [
+             'pgapi = pgapi.api:main',
+         ],
+     },
 )
