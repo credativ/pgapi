@@ -11,10 +11,10 @@ class Config(object):
             "listen_address": "127.0.0.1",
             "debug": True,
             "sudo_user": "postgres",
-            "use_sudo": True,
+            "use_sudo": False,
             "config_file": "pgapi.conf",
             "ssl_mode": "off", # off or adhoc
-            "bypass_systemd": False,
+            "bypass_systemd": True,
             "encoding": 'UTF-8'
         },
         "file": {},
