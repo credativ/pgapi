@@ -1,3 +1,7 @@
 *.pyc
+__pycache__
 htmlcov
 .coverage
+build
+dist
+pgapi.egg-info/
