@@ -1,0 +1,5 @@
+pgapi (0.0.1) unstable; urgency=low
+
+  * Initial Debian packaging.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Fri, 23 Mar 2018 18:05:01 +0100
