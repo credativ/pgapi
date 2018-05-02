@@ -97,6 +97,9 @@ Examples
 * delete the cluster 9.6/foobar:
   `curl -X DELETE http://127.0.0.1:15432/cluster/9.6/foobar`
 
+* check the full API Documentation created with swagger:
+  `http://127.0.0.1:15432/api/doc`
+
 Python Dependencies
 ===================
 

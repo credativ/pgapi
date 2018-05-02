@@ -8,6 +8,8 @@ install_requires=[
     'Flask',
     'Flask_RESTful',
     'PyYAML',
+    'flask_restful_swagger_2',
+    'flask_cors'
 ]
 
 tests_requires=[

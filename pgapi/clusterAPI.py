@@ -1,9 +1,10 @@
 from flask import jsonify, abort
-from flask_restful import Resource, reqparse
+from flask_restful import reqparse
+from flask_restful_swagger_2 import swagger
 import logging
 from pgapi.clusterCommands import *
 
-class Cluster(Resource):
+class Cluster(swagger.Resource):
     _states = ["start", "stop", "restart", "reload", "promote", "status"]
     
     def _findCluster(self, version, name):
@@ -36,6 +37,29 @@ class Cluster(Resource):
             err_message = err_message.format(version, name)
             abort(409, err_message)
 
+    @swagger.doc({
+        'description': "Return a cluster identified by version and name",
+        'parameters': [{
+            'name': 'version',
+            'description': 'Postgres version',
+            'in': 'path',
+            'type': 'string',
+            'default': '10',
+            'required': True
+        }, {
+            'name': 'name',
+            'description': "Cluster Name",
+            'in': 'path',
+            'type': 'string',
+            'default': 'main',
+            'required': True
+        }],
+        'responses': {
+            '200': {
+                'description': "requested meta data and config for specified Cluster"
+            }
+        }
+    })
     def get(self, version, name):
         """Return a cluster identified by version and name.
 
@@ -45,6 +69,29 @@ class Cluster(Resource):
 
         return jsonify(self._findCluster(version, name))
 
+    @swagger.doc({
+        'description': "Create a new cluster identified by version and name",
+        'parameters': [{
+            'name': "version",
+            'description': "Postgres version",
+            'in': "path",
+            'type': "string",
+            'default': '10',
+            'required': True
+        }, {
+            'name': 'name',
+            'description': 'cluster name',
+            'in': 'path',
+            'type': 'string',
+            'default': 'main',
+            'required': True
+        }],
+        'responses': {
+            '200': {
+                'description': "cluster successfully created"
+            }
+        }
+    })
     def post(self, version, name):
         """Create a new cluster identified by version and name
            and return it.
@@ -59,6 +106,29 @@ class Cluster(Resource):
 
         return self._findCluster(version, name), 201
 
+    @swagger.doc({
+        'description': "Delete cluster identified by version and name",
+        'parameters': [{
+            'name': 'version',
+            'description': "Postgres version",
+            'in': 'path',
+            'type': 'string',
+            'default': '10',
+            'required': True
+        }, {
+            'name': 'name',
+            'description': "cluster name",
+            'in': 'path',
+            'type': 'string',
+            'default': 'main',
+            'required': True
+        }],
+        'responses': {
+            '200': {
+                'description': "cluster successfully deleted"
+            }
+        }
+    })
     def delete(self, version, name):
         """Delete a cluster identified by version and name.
 
@@ -72,6 +142,30 @@ class Cluster(Resource):
 
         return "Success", 200
 
+    @swagger.doc({
+        'description': "Update state of a cluster identified by version and name. "
+                       "Update only specified attributes.",
+        'parameters': [{
+            'name': 'version',
+            'description': "Postgres version",
+            'in': 'path',
+            'type': 'string',
+            'default': '10',
+            'required': True
+        }, {
+            'name': 'name',
+            'description': "cluster name",
+            'in': 'path',
+            'type': 'string',
+            'default': 'main',
+            'required': True
+        }],
+        'responses': {
+            '200': {
+                'description': "cluster successfully patched"
+            }
+        }
+    })
     def patch(self, version, name):
         """Update a cluster State.
            Update only attributes that are provided by the client request.
@@ -119,7 +213,15 @@ class Cluster(Resource):
         return self._findCluster(version, name), 202
         
 
-class ClusterList(Resource):
+class ClusterList(swagger.Resource):
+   @swagger.doc({
+       'description': "Returns a list of all clusters found on the system",
+        'responses': {
+            '200': {
+                'description': "object containing list of clusters on the system"
+            }
+        }
+   })
    def get(self):
        """Returns a list of all clusters found on the system.
           
