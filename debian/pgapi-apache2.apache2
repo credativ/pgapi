@@ -1,1 +1,1 @@
-conf wsgi/pgapi.conf
+conf wsgi/pgapi-apache2.conf
