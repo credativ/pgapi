@@ -28,7 +28,11 @@ def main():
 
     # Load Config file, if given
     if args.config_file is not None:
-        config.loadConfigFile(args.config_file)
+        if config.loadConfigFile(args.config_file) is not True:
+            logging.error("Cloud not load config file \"%s\"", args.config_file)
+    else:
+        if config.loadConfigFile(config.getSetting("config_file")) is not True:
+            logging.warning("Cloud not load config file \"%s\"", config.getSetting("config_file"))
 
     # Save command line arguments in runtime config
     for arg in vars(args):
