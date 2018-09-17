@@ -1,0 +1,2 @@
+# This is a glue package for apache2, so it has to depend on apache2!
+pgapi-apache2: web-application-should-not-depend-unconditionally-on-apache2
