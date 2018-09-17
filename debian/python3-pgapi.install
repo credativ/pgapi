@@ -1,2 +1,2 @@
 wsgi/pgapi.wsgi /usr/lib/python3/dist-packages/pgapi/
-conf/pgapi.conf /etc/pgapi/pgapi.conf
+conf/pgapi.conf /etc/pgapi/
