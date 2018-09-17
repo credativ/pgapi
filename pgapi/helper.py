@@ -9,10 +9,10 @@ class Config(object):
             "name": "PGAPI",
             "port": 15432,
             "listen_address": "127.0.0.1",
-            "debug": True,
+            "debug": False,
             "sudo_user": "postgres",
             "use_sudo": False,
-            "config_file": "pgapi.conf",
+            "config_file": "/etc/pgapi/pgapi.conf",
             "ssl_mode": "off", # off or adhoc
             "bypass_systemd": True,
             "encoding": 'UTF-8'
