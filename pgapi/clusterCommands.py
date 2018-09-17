@@ -91,7 +91,7 @@ def cluster_ctl(version, name, action):
 
     options = ""
     if action in ["stop", "restart"]:
-        options == "-f"
+        options = "-f"
 
     sudo = ""
     if config.getSetting("bypass_systemd") is True:
