@@ -1,3 +1,30 @@
+pgapi (0.0.2) unstable; urgency=medium
+
+  [ Julian Schauder ]
+  * Added some hardening and errormessages
+  * Increased codecoverage for tests
+
+  [ Adrian Vondendriesch ]
+  * Restructure setup.py:
+  * Change plugin import method.
+  * Change default settings that define user handling.
+  * Add WSGI sample files.
+  * Make pgapi available as console script.
+  * Add postgresql-common (>= 182) to debian depends.
+  * Introduce a new debian package pgapi-apache2.
+  * Turned debug off by default, move default pgapi.conf.
+  * Install default pgapi.conf under /etc/pgapi.
+  * Remove tabs from pgapi.conf since it's yaml.
+  * Correct config handling.
+
+  [ Julian Schauder ]
+  * Fixed shutdown-mode for restart and stop actions
+
+  [ Adrian Vondendriesch ]
+  * Fix bypass_systemd logic.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Tue, 18 Sep 2018 18:18:43 +0200
+
 pgapi (0.0.1) unstable; urgency=low
 
   * Initial Debian packaging.
