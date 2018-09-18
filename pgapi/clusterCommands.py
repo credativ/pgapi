@@ -94,7 +94,7 @@ def cluster_ctl(version, name, action):
         options = "-f"
 
     sudo = ""
-    if config.getSetting("bypass_systemd") is True:
+    if config.getSetting("bypass_systemd") is False:
         sudo = "sudo "
 
     (returncode, stdout, stderr) = _run_command('{}pg_ctlcluster {} {} {} {}'.format(sudo, version, name, action, options))
