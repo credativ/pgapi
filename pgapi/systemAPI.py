@@ -7,9 +7,14 @@ from pgapi.serverCommands import *
 class System(Resource):
 
     def get(self, section=None):
-        """Return global system informations.
+        """Return global system information.
 
            Example: GET /system
+
+           It's possible to specify what specific setion to be
+           returned by the module. E.g. cpu_config.
+
+           Example: GET /system/cpu_config
         """
         logging.info("GET Request for System information, section=\"%s\"", section)
 

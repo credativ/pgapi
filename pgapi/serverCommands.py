@@ -9,6 +9,12 @@ import psutil
 from pgapi import helper
 
 def get_system_info(section=None):
+    """Get global system information.
+
+       Returns a dictionary that contains various sections about
+       system specific sections. See sections variable for a complete
+       list.
+    """
     system_info = {}
 
     sections = {
