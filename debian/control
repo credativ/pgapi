@@ -15,7 +15,7 @@ Description: Simple REST API for postgresql on Debian systems.
 
 Package: pgapi-apache2
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}, python3-pgapi (= ${binary:Version}), apache2, libjson-perl
+Depends: ${misc:Depends}, ${python3:Depends}, python3-pgapi (= ${binary:Version}), apache2, libjson-perl, libapache2-mod-wsgi-py3
 Description: Apache2 integration files for python3-pgapi.
  This package contains the necessary glue to access pgapi via apache
  wsgi.
