@@ -9,12 +9,15 @@ class ServerAPI(object):
     server_app = None
     server_api = None
 
+    __api_modules = ["clusterAPI", "systemAPI"]
+    #__modules = ["clusterAPI"]
+
     def registerHandler(self):
         """Register all modules as well as some special handler."""
         self.server_app.add_url_rule("/", "index", self.index)
 
-        for mod in ["clusterAPI"]:
-            module = import_module('pgapi.clusterAPI')
+        for mod in self.__api_modules:
+            module = import_module('pgapi.' + mod)
             module.registerHandlers(self.server_api)
         
     def index(self):

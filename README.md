@@ -1,7 +1,8 @@
 Disclaimer
 ==========
 
-*This project is currently in development. Do not use it on production environments!*
+*This project is currently in development. Do not use it on production
+environments!*
 
 About
 =====
@@ -9,6 +10,15 @@ About
 `pgapi` tries to be a simple but useful REST API for Debian based
 PostgreSQL Systems.  It offers a way to create, delete and control
 PostgreSQL clusters via HTTP requests.
+
+pgapi is build to be extensible. This means all API endpoints are
+implemented using there own modules. At the moment pgapi supports
+comes with two modules.
+
+  1. **cluster**: which offers a /cluster endpoint to create, drop,
+     start, stop and configure PostgreSQL Clusters.
+  2. **system**: which offers a /system endpoint that offers information
+     about the system it is running on.
 
 Requirements
 ============
@@ -50,9 +60,12 @@ Getting Started
    ```
    curl -X GET http://127.0.0.1:15432/cluster/
    ```
-   
+
 Installation
 ============
+
+Using setuptools
+----------------
 
 `python setuptools` is within the installation process.
 
@@ -60,13 +73,16 @@ Installation
 python3 setup.py build
 python3 setup.py install
 ```
-   
+
 Examples
 ========
 
+Cluster module:
+---------------
+
 * get a list of all clusters:
   `curl -X GET http://127.0.0.1:15432/cluster/`
-  
+
 * create a new cluster with version 9.6 and name foobar:
   `curl -X POST http://127.0.0.1:15432/cluster/9.6/foobar`
 
@@ -77,7 +93,7 @@ Examples
        -d '{"config": {"port": 8432}}' \
        http://127.0.0.1:15432/cluster/9.6/foobar
   ```
-  
+
 * restart the 9.6/foobar cluster:
   ```
   curl -i -X PATCH \
@@ -96,6 +112,24 @@ Examples
 
 * delete the cluster 9.6/foobar:
   `curl -X DELETE http://127.0.0.1:15432/cluster/9.6/foobar`
+
+System module:
+---------------
+
+* get all system information available via pgapi system module:
+  ```
+  curl -X GET http://127.0.0.1:15432/system/
+  ```
+
+* get a specific system section information (see previous example for
+  available sections):
+  ```
+  curl -X GET http://127.0.0.1:15432/system/hostname/
+  ```
+  ```
+  curl -X GET http://127.0.0.1:15432/system/installed_pg_versions/
+  ```
+
 
 Python Dependencies
 ===================
@@ -117,7 +151,8 @@ This project uses the MIT Licence.
 Debugging
 =========
 
-If something don't work like expected, try to start the api server in debug mode:
+If something don't work like expected, try to start the api server in
+debug mode:
 ```
 pgapi/api.py --config-file conf/pgapi.conf --debug
 ```
