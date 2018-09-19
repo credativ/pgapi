@@ -103,13 +103,27 @@ def cluster_ctl(version, name, action):
 def cluster_create(version, name, opts=None):
     """Creates a new cluster.
     """
-    cmd = 'pg_createcluster %s %s' % (version, name)
 
+    # To create a cluster we need to provide an interface to exactly two programs.
+    # pg_createcluster and initdb.
+
+    # As arguments for both are finite and do not overlap, we'll split them here into
+    # two arrays. Specialcasing where appropriate.
+
+    cmd = 'pg_createcluster %s %s' % (version, name)
+    initdbOpts = ''
     if opts is not None:
         for key, value in opts.items():
-            cmd += ' --%s=%s' % (key, value)
+            if value is None:
+                # Argparse will provide arguments. We don't need to present those to the
+                # programs, so we'll skip
+                continue
+            if key == 'data-checksums':
+                initdbOpts += ' --data-checksums '
+            else:
+                cmd += ' --%s=%s' % (key, value)
 
-    (returncode, stdout, stderr) = _run_command(cmd)
+    (returncode, stdout, stderr) = _run_command("%s -- %s"%(cmd, initdbOpts) )
     return (returncode, stdout, stderr)
 
 def cluster_drop(version, name):

@@ -53,7 +53,12 @@ class Cluster(Resource):
         """
         self._abortIfClusterExists(version, name)
 
-        (rc, out, err) = cluster_create(version, name)
+        parser = reqparse.RequestParser()
+        parser.add_argument("port", type=int, default=None)
+        parser.add_argument("data-checksums", type=bool, default=None)
+        args = parser.parse_args(strict=True)
+
+        (rc, out, err) = cluster_create(version, name, args)
         if 0 != rc:
             return {"returncode": rc, "stdout": out, "stderr": err}, 500
 
