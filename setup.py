@@ -17,7 +17,7 @@ tests_requires=[
 
 setup(
     name='pgapi',
-    version='0.0.2',
+    version='0.0.3',
     license='MIT',
     author='Adrian Vondendriesch',
     author_email='adrian.vondendriesch@credativ.de',

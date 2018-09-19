@@ -1,3 +1,19 @@
+pgapi (0.0.3) unstable; urgency=medium
+
+  [ Adrian Vondendriesch ]
+  * Implement a new HTTP endpoint "/system".
+
+  [ Julian Schauder ]
+  * Added wsgi as apache dependency
+
+  [ Adrian Vondendriesch ]
+  * Add additional system information to /system endpoint.
+  * Add psutil to requirements.
+  * Add some comments about the behavior of systemAPI.
+  * Update README to describe the new system endpoint.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Wed, 19 Sep 2018 14:19:56 +0200
+
 pgapi (0.0.2) unstable; urgency=medium
 
   [ Julian Schauder ]
