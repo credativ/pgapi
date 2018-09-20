@@ -2,7 +2,7 @@ from flask import jsonify, abort
 from flask_restful import Resource, reqparse
 import logging
 
-from pgapi.serverCommands import *
+from pgapi.systemCommands import *
 
 class System(Resource):
 
