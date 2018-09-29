@@ -159,6 +159,8 @@ pgapi/api.py --config-file conf/pgapi.conf --debug
 
 Tests
 =====
+Testing requires the packages pytest and pytest-cov 
+( apt: python3-pytest python3-pytest-cov ) to be installed.
 
 To run all unit tests execute `runtests.sh`
 
