@@ -19,11 +19,11 @@ def test_cluster():
     assert True
 
 def test_create():
-    c = Cluster().post('9.5','apitest')
+    c = Cluster().post('9.6','apitest')
     assert 'apitest' ==c[0]['cluster']
 
 def test_delete():
-    Cluster().delete('9.5','apitest')
+    Cluster().delete('9.6','apitest')
     assert True
 
 

@@ -6,7 +6,7 @@ def test_command_true_1():
     assert True == command_is_safe('pg_lscluster --json')
 
 def test_command_true_2():
-    assert True == command_is_safe('pg_ctlcluster 9.5 main status')
+    assert True == command_is_safe('pg_ctlcluster 9.6 main status')
 
 def test_command_false_1():
     assert False == command_is_safe('pg_lscluster --json; echo foobar')
@@ -15,7 +15,7 @@ def test_command_false_2():
     assert False == command_is_safe('pg_lscluster --json && echo foobar')
 
 def test_command_false_3():
-    assert False == command_is_safe('pg_cltlcluster 9.5 main status || echo foobar')
+    assert False == command_is_safe('pg_cltlcluster 9.6 main status || echo foobar')
 
 def test_param_is_safe_1_true():
     assert True == param_is_safe('port')

@@ -40,11 +40,11 @@ def test_cluster_get_returns_list():
     assert isinstance(c, list)
 
 def test_cluster_get_param():
-    c = cluster_get('9.5', 'main')
+    c = cluster_get('9.6', 'main')
     assert isinstance(c, list)
 
 def test_cluster_get_param_version():
-    c = cluster_get('9.5')
+    c = cluster_get('9.6')
     assert isinstance(c, list)
 
 def test_cluster_get_param_name():
@@ -53,11 +53,11 @@ def test_cluster_get_param_name():
 
 def test_cluster_get_setting():
     # FIXME: The following test assumes there is a 9.6/main cluster.
-    c = cluster_get_setting('9.5', 'main', 'port')
+    c = cluster_get_setting('9.6', 'main', 'port')
     assert isinstance(c, str)
 
 def test_cluster_create():
-    (rc, out, err) = cluster_create('9.5', 'pgapi_test', {'start-conf':'manual',})
+    (rc, out, err) = cluster_create('9.6', 'pgapi_test', {'start-conf':'manual',})
     assert err == ""
     assert 0 == rc
 
@@ -73,41 +73,41 @@ def test_cluster_get_broken():
 
 
 def test_cluster_start():
-    (rc, out, err) = cluster_ctl('9.5', 'pgapi_test', 'start')
+    (rc, out, err) = cluster_ctl('9.6', 'pgapi_test', 'start')
     assert err == ""
     assert 0 == rc
 
 def test_cluster_stop():
-    (rc, out, err) = cluster_ctl('9.5', 'pgapi_test', 'stop')
+    (rc, out, err) = cluster_ctl('9.6', 'pgapi_test', 'stop')
     assert err == ""
     assert 0 == rc
 
 def test_cluster_set_setting():
-    (rc, out, err) = cluster_set_setting('9.5', 'pgapi_test', 'log_connections', 'on')
+    (rc, out, err) = cluster_set_setting('9.6', 'pgapi_test', 'log_connections', 'on')
     assert err == ""
     assert 0 == rc
 
 def test_verify_setting():
-    setting = cluster_get_setting('9.5', 'pgapi_test', 'log_connections')
+    setting = cluster_get_setting('9.6', 'pgapi_test', 'log_connections')
     assert setting == 'on'
 
 def test_verify_bad_setting():
-    setting = cluster_get_setting('9.5', 'pgapi_test', 'use_mysql_dialect')
+    setting = cluster_get_setting('9.6', 'pgapi_test', 'use_mysql_dialect')
     assert setting == None
 
 
 # def test_start_cluster():
-#     (rc, out, err) = ctl_cluster('9.5', 'pgapi_test', 'start')
+#     (rc, out, err) = ctl_cluster('9.6', 'pgapi_test', 'start')
 #     assert err == ""
 #     assert 0 == rc
 
 # def test_stop_cluster():
-#     (rc, out, err) = ctl_cluster('9.5', 'pgapi_test', 'stop')
+#     (rc, out, err) = ctl_cluster('9.6', 'pgapi_test', 'stop')
 #     assert err == ""
 #     assert 0 == rc
 
 def test_cluster_drop():
-    (rc, out, err) = cluster_drop('9.5', 'pgapi_test')
+    (rc, out, err) = cluster_drop('9.6', 'pgapi_test')
     assert err == ""
     assert 0 == rc
 
@@ -117,7 +117,7 @@ def test_nonexistent_dbversion():
     assert 1 == rc
 
 def test_drop_nonexistent_db():
-    (rc, out, err) = cluster_drop('9.5', 'pgapi_testXXXXXXXXXXX')
+    (rc, out, err) = cluster_drop('9.6', 'pgapi_testXXXXXXXXXXX')
     assert err[:-1]=='Error: specified cluster does not exist'
     assert 1 == rc
 
