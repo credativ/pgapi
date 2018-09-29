@@ -6,6 +6,7 @@ import subprocess
 import json
 import logging
 import traceback
+import shutil
 
 from pgapi import helper
 
@@ -43,7 +44,7 @@ def sudo_prefix():
 
     return ""
 
-def _run_command(command):
+def _run_command(command, no_safety_check=False):
     """Run a give command.
     The command is check against a specific regex to ensure it's safe
     to execute. See command_is_safe().
@@ -54,7 +55,7 @@ def _run_command(command):
     subprocess_env = dict( os.environ )
     subprocess_env['LC_ALL'] = 'C'
     # forbid unsafe commands. This one needs some love.
-    if not helper.command_is_safe(command):
+    if not helper.command_is_safe(command) and not no_safety_check:
         logging.error("denail to execute command \"%s\". It's considered unsave.", command)
         raise 'command not safe'
 
@@ -100,6 +101,22 @@ def cluster_ctl(version, name, action):
     (returncode, stdout, stderr) = _run_command('{}pg_ctlcluster {} {} {} {}'.format(sudo, version, name, action, options))
     return (returncode, stdout, stderr)
 
+def SR_create( version, name, conninfo ):
+    # To create a streaming_standby, a created cluster is required.
+    # This makes sure all configuration settings are in place and as required.
+    # Syncing configuration with the primary can be done with additional API-calls if required.
+    # The created clusters data-directory contents will be purged. pg_basebackup will be used to fill
+    # said directory.
+
+    # TODO: Replication_Slots
+
+    infos=cluster_get(version, name)
+    pgdata=infos[0]['pgdata']
+    shutil.rmtree( pgdata )
+    basebackup="pg_basebackup -Xfetch -d %s -D %s --write-recovery-conf"%( conninfo, pgdata )
+    (returncode, stdout, stderr) = _run_command(basebackup, no_safety_check=True)
+    return (returncode, stderr)
+
 def cluster_create(version, name, opts=None):
     """Creates a new cluster.
     """
@@ -112,6 +129,7 @@ def cluster_create(version, name, opts=None):
 
     cmd = 'pg_createcluster %s %s' % (version, name)
     initdbOpts = ''
+    sr_conninfo = None
     if opts is not None:
         for key, value in opts.items():
             if value is None:
@@ -120,10 +138,21 @@ def cluster_create(version, name, opts=None):
                 continue
             if key == 'data-checksums':
                 initdbOpts += ' --data-checksums '
+            elif key == 'sr_conninfo':
+                sr_conninfo = value
             else:
                 cmd += ' --%s=%s' % (key, value)
 
     (returncode, stdout, stderr) = _run_command("%s -- %s"%(cmd, initdbOpts) )
+
+    # IFF the cluster was successfully created and an SR_Standby was required,
+    # the data-dir of said instance can be purged.
+    # This could cause data loss if pg_createcluster returns OK against existing clusters.
+    if sr_conninfo != None and returncode == 0:
+        (rc,err) = SR_create( version, name, sr_conninfo)
+        returncode=rc
+        stderr+=err
+
     return (returncode, stdout, stderr)
 
 def cluster_drop(version, name):

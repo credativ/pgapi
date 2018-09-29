@@ -56,6 +56,9 @@ class Cluster(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("port", type=int, default=None)
         parser.add_argument("data-checksums", type=bool, default=None)
+        parser.add_argument("sr_conninfo", type=str, default=None)
+
+
         args = parser.parse_args(strict=True)
 
         (rc, out, err) = cluster_create(version, name, args)
