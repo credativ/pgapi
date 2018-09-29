@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import sys
 import subprocess
 import json
@@ -147,6 +148,46 @@ def cluster_set_setting(version, name, setting, value):
     cmd = '/usr/bin/pg_conftool --short %s %s set %s %s' % (version, name, setting, value)
     return _run_command(cmd)
 
+def pgcontroldata_get ( pgdata, version ):
+    returndict = {}
+    assert( os.path.exists ( pgdata ) )
+    # PostgreSQL should not be shipped without pg_controldata. Hence it is sane
+    # to check for the version. Could fail on minimalistic installations.
+    available_binaries = helper.get_installed_postgresql_versions( include_path = True )
+
+    # Next up we'll assume that a binaries path ending on our version is the one
+    # viable to work with. This will provide false positives as in /110/ and /10/,
+    # and all sorts of not-strictly named binary paths. This is expected to be solid
+    # once our helperfunction is improved upon and provides a proper dict.
+    relevant_binaries = None
+    for path in available_binaries:
+        if re.search('.*(10)/*', path):
+            relevant_binaries=path
+            break # There should really only be one.
+
+    relevant_binaries= os.path.join( relevant_binaries, 'bin/pg_controldata' )
+
+    # It could be a symlink and we keep it simple. Check for existence
+    assert(os.path.exists ( relevant_binaries ) )
+
+    command = '%s -D %s'%(relevant_binaries, pgdata )
+    # This call is quite likely to fail as it raises the required Permissions to pgdata-owner
+    # or root.
+    (returncode, stdout, stderr) = _run_command( command )
+    if returncode != 0:
+        raise Exception(stderr)
+    stdout=stdout.split('\n')
+
+    # pg_controldata adds error-messages. We'll omit those for now.
+    stdout=[ line for line in stdout if ': ' in line ]
+
+    stdout=[ line.split(': ') for line in stdout ]
+
+    for line in stdout:
+        returndict[line[0]]=line[1].lstrip()
+    return returndict
+
+
 def cluster_get_all():
     """Returns a list of all clusters in as python list.
     """
@@ -155,13 +196,20 @@ def cluster_get_all():
 
     if returncode != 0:
         logging.error("Clusterlisting reports an error. %s"%( stderr.strip() ) )
-
     try:
         if stdout == '':
             raise
         clusters = _json_loads_wrapper(stdout,command) #Critical section. Likely to raise errors
     except Exception as e:
-        return _error_to_json( e ) 
+        return _error_to_json( e )
+
+    for cluster in clusters:
+        try:
+            cluster['pg_controldata']=pgcontroldata_get( cluster['pgdata'], cluster['version'] )
+        except Exception as e:
+            # pgcontroldata requires a lot more permissions than pg_lsclusters.
+            # For that matter an error will be reported, but the call will not fail entirely.
+            cluster['pg_controldata']='Unavailable. %s'%(e)
     return clusters
 
 def cluster_get(version=None, name=None):
