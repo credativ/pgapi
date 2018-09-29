@@ -161,7 +161,7 @@ def pgcontroldata_get ( pgdata, version ):
     # once our helperfunction is improved upon and provides a proper dict.
     relevant_binaries = None
     for path in available_binaries:
-        if re.search('.*(10)/*', path):
+        if re.search('.*(%s)/*'%(version), path):
             relevant_binaries=path
             break # There should really only be one.
 
