@@ -11,19 +11,19 @@ About
 PostgreSQL Systems.  It offers a way to create, delete and control
 PostgreSQL clusters via HTTP requests.
 
-pgapi is build to be extensible. This means all API endpoints are
-implemented using there own modules. At the moment pgapi supports
-comes with two modules.
+pgapi is built to be extensible. This means all API endpoints are
+implemented using their own modules. At the moment pgapi ships with 
+two modules.
 
-  1. **cluster**: which offers a /cluster endpoint to create, drop,
+  1. **cluster**: a /cluster endpoint to create, drop,
      start, stop and configure PostgreSQL Clusters.
-  2. **system**: which offers a /system endpoint that offers information
+  2. **system**: a /system endpoint that provides information
      about the system it is running on.
 
 Requirements
 ============
 
-The user starting the api needs privileges to run commands as user
+The user executing the api needs privileges to run commands as user
 postgres using sudo.  The user postgres needs sudo privileges to start
 and stop a cluster via pg_ctlcluster as user root.
 
@@ -116,7 +116,7 @@ Cluster module:
 System module:
 ---------------
 
-* get all system information available via pgapi system module:
+* get all system information available via the system module:
   ```
   curl -X GET http://127.0.0.1:15432/system/
   ```
@@ -151,7 +151,7 @@ This project uses the MIT Licence.
 Debugging
 =========
 
-If something don't work like expected, try to start the api server in
+If something doesn't work as expected, try to start pgapi in
 debug mode:
 ```
 pgapi/api.py --config-file conf/pgapi.conf --debug
