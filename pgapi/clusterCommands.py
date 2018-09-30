@@ -7,6 +7,7 @@ import json
 import logging
 import traceback
 import shutil
+import time
 
 from pgapi import helper
 
@@ -112,6 +113,16 @@ def SR_create( version, name, conninfo ):
 
     infos=cluster_get(version, name)
     pgdata=infos[0]['pgdata']
+    # Deleting an instance seems dangerous. Lets put as much effort into
+    # making sure we don't delete anything as possible.
+    assert( os.path.exists ( os.path.join(pgdata,'base'))  )                     # There should be the heap-directory within the datadir.
+    assert( os.path.exists ( os.path.join(pgdata,'postmaster.pid'))==False )    # The directory should've just been created. No pid is expected.
+    assert( time.time()                                                         # Racy assumption that the PG_VERSION tag within the target datadir
+            - os.stat(                                                          # is less than 60Seconds old.
+                os.path.join(pgdata,'PG_VERSION')                               # PG_VERSION should rarely ever be updated, hence it is a good
+                ).st_ctime                                                      # safeguard.
+            < 60 ) 
+
     shutil.rmtree( pgdata )
     basebackup="pg_basebackup -Xfetch -d %s -D %s --write-recovery-conf"%( conninfo, pgdata )
     (returncode, stdout, stderr) = _run_command(basebackup, no_safety_check=True)
@@ -149,6 +160,8 @@ def cluster_create(version, name, opts=None):
     # the data-dir of said instance can be purged.
     # This could cause data loss if pg_createcluster returns OK against existing clusters.
     if sr_conninfo != None and returncode == 0:
+        # If SR_create fails, an error will be reported. For now there is no automatic cleanup.
+        # This tends to be a good idea as it allows the user to investigate the error.
         (rc,err) = SR_create( version, name, sr_conninfo)
         returncode=rc
         stderr+=err
