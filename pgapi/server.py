@@ -42,9 +42,10 @@ class ServerAPI(object):
         debug = self._config.getSetting("debug")
         port = self._config.getSetting("port")
         ssl_mode = self._config.getSetting("ssl_mode")
+        host = self._config.getSetting("listen_address")
         if ssl_mode == "adhoc":
             ssl = "adhoc"
         else:
             ssl = None
             
-        self.server_app.run(debug=debug, port=port, ssl_context=ssl)
+        self.server_app.run(debug=debug, host=host, port=port, ssl_context=ssl)
