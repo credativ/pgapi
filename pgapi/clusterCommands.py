@@ -153,19 +153,20 @@ def pgcontroldata_get ( pgdata, version ):
     assert( os.path.exists ( pgdata ) )
     # PostgreSQL should not be shipped without pg_controldata. Hence it is sane
     # to check for the version. Could fail on minimalistic installations.
-    available_binaries = helper.get_installed_postgresql_versions( include_path = True )
+    available_versions = helper.get_installed_postgresql_versions()
 
     # Next up we'll assume that a binaries path ending on our version is the one
     # viable to work with. This will provide false positives as in /110/ and /10/,
     # and all sorts of not-strictly named binary paths. This is expected to be solid
     # once our helperfunction is improved upon and provides a proper dict.
     relevant_binaries = None
-    for path in available_binaries:
-        if re.search('.*(%s)/*'%(version), path):
-            relevant_binaries=path
+    for version in available_versions:
+        binary_path = available_versions[version]["binary_path"]
+        if re.search('.*(%s)/*'%(version), binary_path):
+            relevant_binaries=binary_path
             break # There should really only be one.
 
-    relevant_binaries= os.path.join( relevant_binaries, 'bin/pg_controldata' )
+    relevant_binaries= os.path.join( relevant_binaries, 'pg_controldata' )
 
     # It could be a symlink and we keep it simple. Check for existence
     assert(os.path.exists ( relevant_binaries ) )

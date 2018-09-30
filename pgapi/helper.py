@@ -184,7 +184,14 @@ def valid_cluster_version(version):
     pattern = r"^(\d(\.\d)?|\d{2})$"
     return check_regex(pattern, version)
 
-def get_installed_postgresql_versions( include_path = False):
+def get_installed_postgresql_versions():
+    """Returns a list of installed PostgreSQL versions.
+
+       Returns (dict):
+         key   (string)  -- PostgreSQL version (e.g. 9.6 or 10)
+         value (dict)    -- dict containing additional information about this version
+                            (e.g. binary path)
+    """
     versions = {}
     install_dir = "/usr/lib/postgresql/"
 
@@ -193,10 +200,7 @@ def get_installed_postgresql_versions( include_path = False):
     for version_dir in subdirs:
         initdb_path = os.path.join(*[install_dir, version_dir, "bin", "initdb"])
         if os.path.isfile(initdb_path):
-            # TODO fill up hash with version details
             versions[version_dir] = {}
+            versions[version_dir]['binary_path'] = os.path.join(*[install_dir, version_dir, "bin"])
 
-    if include_path == True:
-        # Quickfix. Should be merged into TODO above
-        subdirs=[os.path.join(install_dir, subdir ) for subdir in subdirs ]
-    return subdirs
+    return versions
