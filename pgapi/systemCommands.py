@@ -26,6 +26,7 @@ def get_system_info(section=None):
         "disk_usage": get_disk_usage,
         "virtual_memory": get_virtual_memory,
         "swap_memory": get_swap_memory,
+        "load": get_load,
     }
 
     if section is None:
@@ -48,7 +49,15 @@ def get_hostname():
     return hostname
 
 def get_uname():
-    return os.uname()
+    (kernel_name, nodename, kernel_release, kernel_version, machine) = os.uname()
+
+    uname = {"kernel_name": kernel_name,
+             "nodename": nodename,
+             "kernel_release": kernel_release,
+             "kernel_version": kernel_version,
+             "machine": machine
+            }
+    return uname
 
 def get_installed_postgresql_versions():
     versions = {}
@@ -100,3 +109,11 @@ def get_virtual_memory():
 def get_swap_memory():
     return psutil.swap_memory()
 
+def get_load():
+    (load_1min, load_5min, load_15min) = os.getloadavg()
+
+    load = {"1min": load_1min,
+            "5min": load_5min,
+            "15min": load_15min
+           }
+    return load
