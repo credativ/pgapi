@@ -1,3 +1,19 @@
+pgapi (0.0.4) unstable; urgency=medium
+
+  [ Julian Schauder ]
+  * Added Arguments to Clustercreation
+  * Initial implementation for pg_controldata
+  * Added dependencies to tests
+  * Bumped default tests-pgversion from 9.5 to 9.6. this is default in debian stable(stretch)
+  * Minor fixes to the README
+
+  [ Adrian Vondendriesch ]
+  * Add "load" section to systemCommands.
+  * Refactor get_installed_postgresql_versions.
+  * Respect listen_address parameter.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Tue, 09 Oct 2018 21:33:39 +0200
+
 pgapi (0.0.3) unstable; urgency=medium
 
   [ Adrian Vondendriesch ]
