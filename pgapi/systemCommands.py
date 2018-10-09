@@ -60,18 +60,7 @@ def get_uname():
     return uname
 
 def get_installed_postgresql_versions():
-    versions = {}
-    install_dir = "/usr/lib/postgresql/"
-
-    subdirs = os.listdir(install_dir)
-
-    for version_dir in subdirs:
-        initdb_path = os.path.join(*[install_dir, version_dir, "bin", "initdb"])
-        if os.path.isfile(initdb_path):
-            # TODO fill up hash with version details
-            versions[version_dir] = {}
-
-    return subdirs
+    return helper.get_installed_postgresql_versions()
 
 def get_cpu_config():
     cpu_config = {}

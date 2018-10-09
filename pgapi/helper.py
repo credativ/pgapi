@@ -183,3 +183,24 @@ def valid_cluster_version(version):
     # We want to match eg. 10, 9.6 but not 9.6.1 or 10.1
     pattern = r"^(\d(\.\d)?|\d{2})$"
     return check_regex(pattern, version)
+
+def get_installed_postgresql_versions():
+    """Returns a list of installed PostgreSQL versions.
+
+       Returns (dict):
+         key   (string)  -- PostgreSQL version (e.g. 9.6 or 10)
+         value (dict)    -- dict containing additional information about this version
+                            (e.g. binary path)
+    """
+    versions = {}
+    install_dir = "/usr/lib/postgresql/"
+
+    subdirs = os.listdir(install_dir)
+
+    for version_dir in subdirs:
+        initdb_path = os.path.join(*[install_dir, version_dir, "bin", "initdb"])
+        if os.path.isfile(initdb_path):
+            versions[version_dir] = {}
+            versions[version_dir]['binary_path'] = os.path.join(*[install_dir, version_dir, "bin"])
+
+    return versions
