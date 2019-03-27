@@ -162,7 +162,7 @@ def pgcontroldata_get ( pgdata, version ):
     # It could be a symlink and we keep it simple. Check for existence
     assert(os.path.exists ( controldata ) )
 
-    command = '%s -D %s'%(controldata, pgdata )
+    command = '%s %s'%(controldata, pgdata )
     # This call is quite likely to fail as it raises the required Permissions to pgdata-owner
     # or root.
     (returncode, stdout, stderr) = _run_command( command )
