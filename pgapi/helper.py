@@ -195,6 +195,11 @@ def get_installed_postgresql_versions():
     versions = {}
     install_dir = "/usr/lib/postgresql/"
 
+    # Return a empty version list if no postgresql verion, if the
+    # install_dir does not exist.
+    if not os.isdir(install_dir):
+        return versions
+    
     subdirs = os.listdir(install_dir)
 
     for version_dir in subdirs:
