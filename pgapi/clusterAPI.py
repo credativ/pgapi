@@ -117,11 +117,25 @@ class Cluster(Resource):
                 err_message = err_message.format(",".join(self._states))
                 abort(400, err_message)
 
+            # Check if the cluster is already in wanted state.
+            # We do this check only for start, stop and promote.
+            cluster = self._findCluster(version, name)
+            running = cluster["running"]
+            if "recovery" in cluster:
+                recovery = cluster["recovery"]
+            else:
+                recovery = 0
+
+            if (running == 0 and args["state"] == "stop") or \
+               (running == 1 and args["state"] == "start") or \
+               (recovery == 0 and args["state"] == "promote"):
+                return self._findCluster(version, name), 200
+
             (rc, out, err) = cluster_ctl(version, name, args["state"]) 
             if rc != 0:
                 return {"rc": rc, "stdout": out, "stderr": err}, 500
 
-        return self._findCluster(version, name), 202
+        return self._findCluster(version, name), 200
         
 
 class ClusterList(Resource):
