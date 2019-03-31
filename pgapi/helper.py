@@ -117,28 +117,6 @@ def check_regex(pattern, value):
 
     return True
     
-def command_is_safe(command):
-    """
-    Checks if a command is "safe" in the manner of this api.
-
-    We only allow the following characters:
-       - [a-z][A-Z]
-       - " ", TAB, etc.
-       - [0-9]
-       - "."
-       - "="
-       - "-"
-       - "/"
-    
-    Function Arguments:
-       command (string) -- command to execute
-
-    Returns (bool):
-       True  -- if it's save to execute (regarding the defined regex)
-       False -- otherwise
-    """
-    pattern = r"^[\d\w\s\/\.\-=/]*$"
-    return check_regex(pattern, command)
 
 def param_is_safe(param):
     """
@@ -183,29 +161,3 @@ def valid_cluster_version(version):
     # We want to match eg. 10, 9.6 but not 9.6.1 or 10.1
     pattern = r"^(\d(\.\d)?|\d{2})$"
     return check_regex(pattern, version)
-
-def get_installed_postgresql_versions():
-    """Returns a list of installed PostgreSQL versions.
-
-       Returns (dict):
-         key   (string)  -- PostgreSQL version (e.g. 9.6 or 10)
-         value (dict)    -- dict containing additional information about this version
-                            (e.g. binary path)
-    """
-    versions = {}
-    install_dir = "/usr/lib/postgresql/"
-
-    # Return a empty version list if no postgresql verion, if the
-    # install_dir does not exist.
-    if not os.path.isdir(install_dir):
-        return versions
-    
-    subdirs = os.listdir(install_dir)
-
-    for version_dir in subdirs:
-        initdb_path = os.path.join(*[install_dir, version_dir, "bin", "initdb"])
-        if os.path.isfile(initdb_path):
-            versions[version_dir] = {}
-            versions[version_dir]['binary_path'] = os.path.join(*[install_dir, version_dir, "bin"])
-
-    return versions
