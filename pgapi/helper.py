@@ -117,28 +117,6 @@ def check_regex(pattern, value):
 
     return True
     
-def command_is_safe(command):
-    """
-    Checks if a command is "safe" in the manner of this api.
-
-    We only allow the following characters:
-       - [a-z][A-Z]
-       - " ", TAB, etc.
-       - [0-9]
-       - "."
-       - "="
-       - "-"
-       - "/"
-    
-    Function Arguments:
-       command (string) -- command to execute
-
-    Returns (bool):
-       True  -- if it's save to execute (regarding the defined regex)
-       False -- otherwise
-    """
-    pattern = r"^[\d\w\s\/\.\-=/]*$"
-    return check_regex(pattern, command)
 
 def param_is_safe(param):
     """
