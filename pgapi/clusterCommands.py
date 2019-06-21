@@ -149,7 +149,7 @@ def cluster_create(version, name, opts=None):
             version,
             name]
     initdbOpts = []
-    sr_conninfo = None
+    primary_conninfo = None
     if opts is not None:
         for key, value in opts.items():
             if value is None:
@@ -158,8 +158,8 @@ def cluster_create(version, name, opts=None):
                 continue
             if key == 'data-checksums':
                 initdbOpts += ['--data-checksums',]
-            elif key == 'sr_conninfo':
-                sr_conninfo = value
+            elif key == 'primary_conninfo':
+                primary_conninfo = value
             else:
                 cmd += ['--%s=%s' % (key, value), ]
 
@@ -168,10 +168,10 @@ def cluster_create(version, name, opts=None):
     # IFF the cluster was successfully created and an SR_Standby was required,
     # the data-dir of said instance can be purged.
     # This could cause data loss if pg_createcluster returns OK against existing clusters.
-    if sr_conninfo != None and returncode == 0:
+    if primary_conninfo != None and returncode == 0:
         # If SR_create fails, an error will be reported. For now there is no automatic cleanup.
         # This tends to be a good idea as it allows the user to investigate the error.
-        (rc,err) = SR_create( version, name, sr_conninfo)
+        (rc,err) = SR_create( version, name, primary_conninfo)
         returncode=rc
         stderr+=err
 
