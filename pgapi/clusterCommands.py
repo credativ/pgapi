@@ -7,6 +7,8 @@ import subprocess
 import json
 import logging
 import traceback
+import shutil
+import time
 
 from pgapi import helper
 
@@ -46,30 +48,29 @@ def sudo_prefix():
 
 def _run_command(command):
     """Run a give command.
-    The command is check against a specific regex to ensure it's safe
-    to execute. See command_is_safe().
     As commandoutput will always be reinterpreted we'll ensure maximum compatibility
     via LC_ALL=C.
+    Commands should always be transmitted as an array to ensure security.
+    However, it is possible to injext a string for compatibility reasons.
     """
+    if isinstance( command, str ): # Compat
+        command = command.split()
+
     logging.debug("request to execute \"%s\"", command)
     subprocess_env = dict( os.environ )
     subprocess_env['LC_ALL'] = 'C'
-    # forbid unsafe commands. This one needs some love.
-    if not helper.command_is_safe(command):
-        logging.error("denail to execute command \"%s\". It's considered unsave.", command)
-        raise 'command not safe'
 
     # get system encoding
     config = helper.Config.getInstance()
     encoding = config.getSetting("encoding")
     
     # prefix with sudo and locale
-    command = "{} {}".format(sudo_prefix(), command)
+    command = sudo_prefix().split() +  command
     logging.info("execute command \"%s\"", command)
     try:
         ## As of python 3.6, 'encoding' is a valid argument for subprocess.
         ## To achieve compatibility to earlier versions of python we refrain from it.
-        proc = subprocess.Popen( command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=subprocess_env )
+        proc = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=subprocess_env )
         (stdout, stderr) = proc.communicate()
         (stdout, stderr) = (stdout.decode( encoding ), stderr.decode( encoding ) )
     except Exception as e:
@@ -101,6 +102,40 @@ def cluster_ctl(version, name, action):
     (returncode, stdout, stderr) = _run_command('{}pg_ctlcluster {} {} {} {}'.format(sudo, version, name, action, options))
     return (returncode, stdout, stderr)
 
+def SR_create( version, name, conninfo ):
+    # To create a streaming_standby, a created cluster is required.
+    # This makes sure all configuration settings are in place and as required.
+    # Syncing configuration with the primary can be done with additional API-calls if required.
+    # The created clusters data-directory contents will be purged. pg_basebackup will be used to fill
+    # said directory.
+
+    # TODO: Replication_Slots
+
+    infos=cluster_get(version, name)
+    pgdata=infos[0]['pgdata']
+    # Deleting an instance seems dangerous. Lets put as much effort into
+    # making sure we don't delete anything as possible.
+    assert( os.path.exists ( os.path.join(pgdata,'base'))  )                     # There should be the heap-directory within the datadir.
+    assert( os.path.exists ( os.path.join(pgdata,'postmaster.pid'))==False )    # The directory should've just been created. No pid is expected.
+    assert( time.time()                                                         # Racy assumption that the PG_VERSION tag within the target datadir
+            - os.stat(                                                          # is less than 60Seconds old.
+                os.path.join(pgdata,'PG_VERSION')                               # PG_VERSION should rarely ever be updated, hence it is a good
+                ).st_ctime                                                      # safeguard.
+            < 60 ) 
+
+    shutil.rmtree( pgdata )
+    basebackup=["pg_basebackup",
+                "-Xfetch",
+                "-d",
+                conninfo,
+                "-D",
+                pgdata,
+                "--write-recovery-conf",
+                "--checkpoint=fast"
+                ]
+    (returncode, stdout, stderr) = _run_command(basebackup)
+    return (returncode, stderr)
+
 def cluster_create(version, name, opts=None):
     """Creates a new cluster.
     """
@@ -111,8 +146,11 @@ def cluster_create(version, name, opts=None):
     # As arguments for both are finite and do not overlap, we'll split them here into
     # two arrays. Specialcasing where appropriate.
 
-    cmd = 'pg_createcluster %s %s' % (version, name)
-    initdbOpts = ''
+    cmd = ["pg_createcluster",
+            version,
+            name]
+    initdbOpts = []
+    sr_conninfo = None
     if opts is not None:
         for key, value in opts.items():
             if value is None:
@@ -120,11 +158,24 @@ def cluster_create(version, name, opts=None):
                 # programs, so we'll skip
                 continue
             if key == 'data-checksums':
-                initdbOpts += ' --data-checksums '
+                initdbOpts += ['--data-checksums',]
+            elif key == 'primary_conninfo':
+                sr_conninfo = value
             else:
-                cmd += ' --%s=%s' % (key, value)
+                cmd += ['--%s=%s' % (key, value), ]
 
-    (returncode, stdout, stderr) = _run_command("%s -- %s"%(cmd, initdbOpts) )
+    (returncode, stdout, stderr) = _run_command( cmd + ['--',] + initdbOpts )
+
+    # IFF the cluster was successfully created and an SR_Standby was required,
+    # the data-dir of said instance can be purged.
+    # This could cause data loss if pg_createcluster returns OK against existing clusters.
+    if sr_conninfo != None and returncode == 0:
+        # If SR_create fails, an error will be reported. For now there is no automatic cleanup.
+        # This tends to be a good idea as it allows the user to investigate the error.
+        (rc,err) = SR_create( version, name, sr_conninfo)
+        returncode=rc
+        stderr+=err
+
     return (returncode, stdout, stderr)
 
 def cluster_drop(version, name):
