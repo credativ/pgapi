@@ -9,7 +9,7 @@ class ServerAPI(object):
     server_app = None
     server_api = None
 
-    __api_modules = ["clusterAPI", "systemAPI"]
+    __api_modules = ["clusterAPI", "systemAPI","backupAPI"]
     #__modules = ["clusterAPI"]
 
     def registerHandler(self):
