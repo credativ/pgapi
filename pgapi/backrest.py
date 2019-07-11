@@ -9,6 +9,11 @@ from flask_restful import reqparse
 
 class backrest(backupsolution):
 
+    def info(self):
+        infos={"implementation":"pgBackRest",
+            "features":['incrementalbackups','fullbackups','s3?']}
+        return infos
+
     def _list(self):
         (stdout_json, stderr) = backrest_cli.info()
         schema_corrected_output = {}

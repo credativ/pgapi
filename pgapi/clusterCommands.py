@@ -196,7 +196,13 @@ def cluster_get_setting(version, name, setting):
 def cluster_set_setting(version, name, setting, value):
     """Changes the value of a existing cluster.
     """
-    cmd = '/usr/bin/pg_conftool --short %s %s set %s %s' % (version, name, setting, value)
+    cmd = ["/usr/bin/pg_conftool",
+           "--short",
+           version,
+           name,
+           "set",
+            setting,
+            value]
     return _run_command(cmd)
 
 def pgcontroldata_get ( pgdata, version ):
