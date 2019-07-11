@@ -5,6 +5,7 @@ class backupsolution:
         @list_backups( cluster_identifier=None,  backup_identifier=None)
         @take_backup(kind,cluster_identifier=None)
         @remove_backup(kind,backup_identifier=None)
+        @info()
 
         @check(cluster_identifier=None)
 
@@ -12,7 +13,7 @@ class backupsolution:
         @remove_cluster(cluster_identifier=None)
 
     Childs should override:
-
+        @info()
         @list_backups(self,cluster_identifier=None,  backup_identifier=None)
         @_take_full_backup(self,cluster_identifier=None)
         @_take_incremental_backup(self,cluster_identifier=None)
@@ -32,6 +33,9 @@ class backupsolution:
         """
         backupsolution._warn_not_implemented("list-backups")
 
+
+    def info(self):
+        backupsolution._warn_not_implemented("info")
 
     def add_cluster(self, cluster_identifier=None):
         backupsolution._warn_not_implemented("add cluster")
