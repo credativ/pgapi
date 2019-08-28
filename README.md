@@ -141,7 +141,7 @@ Other Dependencies
 
 Beside the above listed python dependencies, it's expected that
 postgresql-common is available on the system.  pgapi makes heavy use
-of postgresql-common and some of the tools that's shipped with it.
+of postgresql-common and some of the tools that are shipped with it.
 
 Licence
 =======
