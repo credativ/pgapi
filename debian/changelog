@@ -1,3 +1,9 @@
+pgapi (0.0.5) UNRELEASED; urgency=medium
+
+  * 
+
+ -- Christoph Berg <myon@debian.org>  Wed, 28 Aug 2019 15:13:37 +0200
+
 pgapi (0.0.4) unstable; urgency=medium
 
   [ Julian Schauder ]
