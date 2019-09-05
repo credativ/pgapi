@@ -3,7 +3,7 @@ import os
 import yaml
 import re
 
-class Config(object): 
+class Config(object):
     __config = {
         "defaults": {
             "name": "PGAPI",
@@ -30,21 +30,21 @@ class Config(object):
         """Get a Config object instance.
 
         If not already created, it will create a new Config object.
-        
+
         Returns (Config):
            config -- Config object
         """
         if not cls.__instance:
             cls.__instance = Config()
         return cls.__instance
-        
+
     def getSettingAndNamespace(self, setting):
         """Returns the value for a given setting and provides the
         namespace it comes from.
 
         Function Arguments:
            setting (string) -- setting for which the value will be returned
-        
+
         Returns: tuple (value, namespace)
            value (any)        -- value for setting, if setting is found in any namespace
                               -- None otherwise
@@ -94,7 +94,7 @@ class Config(object):
             False -- if the file could not be loaded."""
         try:
             with open(filename, 'r') as f:
-                self.__config["file"] = yaml.load(f)
+                self.__config["file"] = yaml.load(f, Loader=yaml.SafeLoader)
         except:
             return False
 
@@ -106,7 +106,7 @@ def check_regex(pattern, value):
     Function Argmuents:
        pattern (string) -- regex pattern
        value (string)   -- value to compair against the pattern
-    
+
     Returns (bool):
        True  -- if the value matches the provided pattern
        False -- otherwise
@@ -116,7 +116,7 @@ def check_regex(pattern, value):
         return False
 
     return True
-    
+
 
 def param_is_safe(param):
     """
@@ -137,10 +137,10 @@ def param_is_safe(param):
 
 def valid_cluster_name(name):
     """Checks if a cluster name is valid.
-    
+
     Function Arguments:
        name (string) -- name of the cluster
-    
+
     Returns (bool):
        True  -- if the cluster name is valid (regarding the defined regex)
        False -- otherwise
@@ -150,10 +150,10 @@ def valid_cluster_name(name):
 
 def valid_cluster_version(version):
     """Checks if a given cluster version is valid.
-    
+
     Function Arguments:
        name (string) -- version of the cluster
-    
+
     Returns (bool):
        True  -- if the cluster version is valid
        False -- otherwise
@@ -177,7 +177,7 @@ def get_installed_postgresql_versions():
     # install_dir does not exist.
     if not os.path.isdir(install_dir):
         return versions
-    
+
     subdirs = os.listdir(install_dir)
 
     for version_dir in subdirs:
