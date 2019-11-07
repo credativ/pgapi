@@ -12,7 +12,7 @@ def test2():
     config.loadConfigFile("tests/pgapi.conf")
     
 def test3():
-    assert 25432 == config.getSetting("port")
+    assert 15432 == config.getSetting("port")
 
 def test4():
     config.setSetting("arguments", "port", 13)
