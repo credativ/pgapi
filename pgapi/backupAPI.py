@@ -72,10 +72,8 @@ class _Backup(Resource):
     def delete(self, cluster_identifier=None, backup_identifier=None):
         logging.info("DELETE Request for Backups")
         if backup_identifier:
-            pass
             raise NotImplementedError
-            # delete a backup
-            #out = backup().remove_cluster( cluster_identifier )
+            # delete a backup            
             # return jsonify( out )
         elif cluster_identifier:
             out = backup().remove_cluster(cluster_identifier)

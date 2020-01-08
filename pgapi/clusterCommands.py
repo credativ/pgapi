@@ -27,8 +27,7 @@ def _json_loads_wrapper(string, command='unnamed command'):
     return _json
 
 def _error_to_json( message ):
-    error=dict()
-    error['Error'] = str(message)
+    error={ 'Error': str(message) }
     return json.dumps(error)
 
 
@@ -51,7 +50,7 @@ def _run_command(command):
     As commandoutput will always be reinterpreted we'll ensure maximum compatibility
     via LC_ALL=C.
     Commands should always be transmitted as an array to ensure security.
-    However, it is possible to injext a string for compatibility reasons.
+    However, it is possible to inject a string for compatibility reasons.
     """
     if isinstance( command, str ): # Compat
         command = command.split()
@@ -84,7 +83,7 @@ def _run_command(command):
     return (returncode, stdout, stderr)
 
 def cluster_ctl(version, name, action):
-    """Control a existing cluster.
+    """Control an existing cluster.
     """
     if not action in CTL_ALLOWED_ACTIONS:
         raise Exception("Action has to be one of %s" % (str(CTL_ALLOWED_ACTIONS ) ))
@@ -113,8 +112,8 @@ def SR_create( version, name, conninfo ):
 
     infos=cluster_get(version, name)
     pgdata=infos[0]['pgdata']
-    # Deleting an instance seems dangerous. Lets put as much effort into
-    # making sure we don't delete anything as possible.
+    # Deleting an instance seems dangerous. Lets put as much effort as possible into
+    # making sure we don't delete anything.
     assert( os.path.exists ( os.path.join(pgdata,'base'))  )                     # There should be the heap-directory within the datadir.
     assert( os.path.exists ( os.path.join(pgdata,'postmaster.pid'))==False )    # The directory should've just been created. No pid is expected.
     assert( time.time()                                                         # Racy assumption that the PG_VERSION tag within the target datadir
@@ -166,7 +165,7 @@ def cluster_create(version, name, opts=None):
 
     (returncode, stdout, stderr) = _run_command( cmd + ['--',] + initdbOpts )
 
-    # IFF the cluster was successfully created and an SR_Standby was required,
+    # If the cluster was successfully created and an SR_Standby was required,
     # the data-dir of said instance can be purged.
     # This could cause data loss if pg_createcluster returns OK against existing clusters.
     if sr_conninfo != None and returncode == 0:

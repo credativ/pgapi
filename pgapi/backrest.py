@@ -10,8 +10,10 @@ from flask_restful import reqparse
 class backrest(backupsolution):
 
     def info(self):
-        infos={"implementation":"pgBackRest",
-            "features":['incrementalbackups','fullbackups','s3?']}
+        infos={
+            "implementation":"pgBackRest",
+            "features":['incrementalbackups','fullbackups','s3?']
+            }
         return infos
 
     def _list(self):
@@ -24,7 +26,7 @@ class backrest(backupsolution):
                                         ][backup['label']] = backup
 
         cnf = backrestconfig().dict_merge_into(schema_corrected_output)
-        print(cnf)
+        debug("pgbackrest config and backups:\n{}".format(cnf))
         return schema_corrected_output
 
     def list_backups(self, cluster_identifier=None, backup_identifier=None):
@@ -45,23 +47,17 @@ class backrest(backupsolution):
         return {"stdout": out[0], "stderr": out[1]}
 
     def add_cluster(self, cluster_identifier=None):
-        parser = reqparse.RequestParser()
-        parser.add_argument("pg1-path", type=str, default=None)
-        args = parser.parse_args(strict=False)
-
         brc = backrestconfig()
         brc.add_cluster(cluster_identifier)
 
-        
-        #brc.add_key(cluster_identifier, 'pg1-path', args['pg1-path'])
         try:
             data_dir = [instance['config']['data_directory']
                         for instance in cluster_get_all() 
                             if instance['config']['cluster_name'] == cluster_identifier.replace('-','/') ][0]
-        except LookupError as e:
+        except LookupError:
             raise Exception("Cluster does not exist.")
-        debug(f"Datadir is {data_dir}")
-        #[0]['config']['data_directory']
+        
+        debug(f"Datadir is {data_dir}")        
         brc.add_key(cluster_identifier, 'pg1-path', data_dir)
 
         out = backrest_cli.stanza_create(cluster_identifier )

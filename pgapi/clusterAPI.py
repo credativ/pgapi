@@ -25,13 +25,13 @@ class Cluster(Resource):
         return False
 
     def _abortIfClusterDoesNotExists(self, version, name):
-        if False == self._clusterExists(version, name):
+        if not self._clusterExists(version, name):
             err_message = "The requested Cluster (version='{}', name='{}' does not exists"
             err_message = err_message.format(version, name)
             abort(404, err_message)
             
     def _abortIfClusterExists(self, version, name):
-        if True == self._clusterExists(version, name):
+        if self._clusterExists(version, name):
             err_message = "The requested Cluster (version='{}', name='{}' already exists"
             err_message = err_message.format(version, name)
             abort(409, err_message)

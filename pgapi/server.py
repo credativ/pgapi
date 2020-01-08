@@ -35,7 +35,6 @@ class ServerAPI(object):
         self.server_api = Api(self.server_app)
 
         self.registerHandler()
-        return (self.server_app, self.server_api)
 
     def start(self):
         """Start the server."""

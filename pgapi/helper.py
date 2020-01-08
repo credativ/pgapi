@@ -111,11 +111,10 @@ def check_regex(pattern, value):
        True  -- if the value matches the provided pattern
        False -- otherwise
     """
-    found = re.search(pattern, value)
-    if not found:
-        return False
-
-    return True
+    if re.search(pattern, value):
+        return True
+    else:    
+        return False    
 
 
 def param_is_safe(param):
