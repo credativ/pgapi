@@ -17,12 +17,7 @@ def test_sudo_prefix():
     assert sudo_prefix_str == "sudo -u postgres"
 
 
-def test_cluster_get_returns_list():
-    c = cluster_get_all()
-    assert isinstance(c, list)
-
-
-def test_cluster_get_returns_list():
+def test_cluster_get_all_returns_list():
     c = cluster_get_all()
     assert isinstance(c, list)
 
@@ -86,7 +81,7 @@ def test_cluster_get_broken():
         os.environ['PATH'] = '.'
         c = cluster_get_all()
         assert False
-    except Exception as e:
+    except Exception:
         os.environ['PATH'] = oldpath
         assert True
 
@@ -106,7 +101,7 @@ def test_cluster_stop(test_client):
     assert r.status_code == 200
 
 
-def test_cluster_stop_validate(test_client):
+def test_cluster_stop_validate_patch(test_client):
     r = test_client.patch('/cluster/11/demo', data={'state': 'stop'})
     assert r.status_code == 200
 
