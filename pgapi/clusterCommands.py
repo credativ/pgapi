@@ -247,7 +247,7 @@ def cluster_get_all():
         logging.error("Clusterlisting reports an error. %s"%( stderr.strip() ) )
     try:
         if stdout == '':
-            raise
+            raise Exception("no output from pg_lsclusters on stdout")
         clusters = _json_loads_wrapper(stdout,command) #Critical section. Likely to raise errors
     except Exception as e:
         return _error_to_json( e )
