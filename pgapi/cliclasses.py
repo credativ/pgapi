@@ -27,7 +27,7 @@ class logline:
         return int(self) > int(comparator)
 
     def __int__(self):
-        return self.mkdiline_nr
+        return self.line_nr
 
 
 class read_channel(Thread):

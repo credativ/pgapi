@@ -40,7 +40,7 @@ class backupsolution:
     def add_cluster(self, cluster_identifier=None):
         backupsolution._warn_not_implemented("add cluster")
 
-    def remove_cluster(cluster_identifier=None):
+    def remove_cluster(self,cluster_identifier=None):
         backupsolution._warn_not_implemented("remove cluster")
 
     def check(self, cluster_identifier=None,  backup_identifier=None):
