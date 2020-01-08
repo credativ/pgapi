@@ -59,6 +59,15 @@ class backupsolution:
         elif kind == 'logical':
             self._remove_logical_backup(backup_identifier)
 
+    def _remove_full_backup(self, backup_identifier=None):
+        backupsolution._warn_not_implemented("_remove_full_backup")
+
+    def _remove_incremental_backup(self, backup_identifier=None):
+        backupsolution._warn_not_implemented("_remove_incremental_backup")
+    
+    def _remove_logical_backup(self, backup_identifier=None):
+        backupsolution._warn_not_implemented("_remove_logical_backup")
+
     def take_backup(self, kind='full', cluster_identifier=None,  backup_identifier=None):
         """Currently 3 Kinds of backups are supported:
             * full - full physical
