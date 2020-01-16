@@ -5,3 +5,5 @@ htmlcov
 build
 dist
 pgapi.egg-info/
+Dockerfile
+Notes.md
