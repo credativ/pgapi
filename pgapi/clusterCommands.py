@@ -41,7 +41,7 @@ def sudo_prefix():
     sudo_user = config.getSetting("sudo_user")
 
     if use_sudo and sudo_user:
-        return "sudo -u {}".format(sudo_user)
+        return f"sudo -u {sudo_user}"
 
     return ""
 
@@ -94,11 +94,11 @@ def cluster_ctl(version, name, action):
     if action in ["stop", "restart"]:
         options = "-f"
 
-    sudo = ""
-    if config.getSetting("bypass_systemd") is False:
-        sudo = "sudo "
+    sudo = "sudo "
+    #if config.getSetting("bypass_systemd") is False:
+    #    sudo = "sudo "
 
-    (returncode, stdout, stderr) = _run_command('{}pg_ctlcluster {} {} {} {}'.format(sudo, version, name, action, options))
+    (returncode, stdout, stderr) = _run_command(f'sudo pg_ctlcluster {version} {name} {action} {options}')
     return (returncode, stdout, stderr)
 
 def SR_create( version, name, conninfo ):

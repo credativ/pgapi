@@ -1,4 +1,4 @@
-
+from flask import abort
 class backupsolution:
     """Virtual Parent for all Backups
     Highlevel-API:
@@ -94,4 +94,4 @@ class backupsolution:
 
     @staticmethod
     def _warn_not_implemented(service):
-        raise Exception(service+" is not supported")
+        abort(500, f"{service} is not supported")

@@ -1,5 +1,5 @@
 
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 from flask_restful import Resource, reqparse
 import logging
 
@@ -50,23 +50,21 @@ class _Backup(Resource):
                 out = backup().list_backups(cluster_identifier=cluster_identifier)
             else:
                 out = backup().list_backups()
-            out = { **out, **({"info":backup().info()}) }
+            #out = { **out, **({"info":backup().info()}) }
             return jsonify(out)
         except Exception as e:
             return abort(500, str(e))
 
-    def put(self, cluster_identifier=None, backup_identifier=None):
+    def put(self, cluster_identifier=None, backup_kind=None):
         """PUT creates a cluster or starts a backup.
         To be somewhat REST compliant, it is of no relevance what
-        exactly we PUT to as /backupidentifier."""
-        out = None
-        if (cluster_identifier and not backup_identifier):
-            out = backup().add_cluster(cluster_identifier, )
-        elif (backup_identifier):
-            parser = reqparse.RequestParser()
-            parser.add_argument("kind", type=str, default='full')
-            args = parser.parse_args(strict=False)
-            out = backup().take_backup(cluster_identifier=cluster_identifier, kind=args['kind'])
+        exactly we PUT to as /backupidentifier."""       
+        out = None        
+        backup_kind=request.args.get('kind')
+        if (cluster_identifier and not backup_kind):
+            out = backup().add_cluster(cluster_identifier)
+        elif (backup_kind):            
+            out = backup().take_backup(cluster_identifier=cluster_identifier, kind=backup_kind)
         return jsonify(str(out))
 
     def delete(self, cluster_identifier=None, backup_identifier=None):
@@ -83,6 +81,9 @@ class _Backup(Resource):
         # return jsonify(backups)
 
 
+# cluster_identifier='11-main'
+# backup_identifier=$Timestamp
+
 def registerHandlers(api):
     api.add_resource(_Activity, '/backup_activity/', endpoint="backup_activity")
     api.add_resource(_Activity, '/backup_activity/<string:action_uuid>/', endpoint="backup_activity_uuid")
@@ -91,5 +92,6 @@ def registerHandlers(api):
     api.add_resource(_Backup, '/backup/', endpoint="backup")
     api.add_resource(_Backup, '/backup/<string:cluster_identifier>',
                      endpoint="backup_cluster_identifier")
-    api.add_resource(_Backup, '/backup/<string:cluster_identifier>/<string:backup_identifier>',
-                     endpoint="backup_cluster_identifier_backup_identifier")
+    
+    #api.add_resource(_Backup, '/backup/<string:cluster_identifier>',
+                     #endpoint="backup_cluster_identifier_backup_kind")

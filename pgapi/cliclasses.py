@@ -9,6 +9,7 @@ import time
 import datetime
 
 from configparser import ConfigParser, DuplicateSectionError
+import pgapi.clusterCommands as cc
 
 background_tasks = []
 
@@ -106,6 +107,7 @@ class cli:
         global background_tasks
         debug("Executing: %s with Blocking=%s" % (str(cmd), blocking))
         proc = Popen(['sudo', '-u', 'postgres']+cmd, stdout=PIPE, stderr=PIPE)
+        (stdout_data, stderr_data)= proc.communicate()
 
         background_task.active = [
             process for process in background_task.active if not process.isAlive() and process.reached_ttl()]
@@ -121,11 +123,11 @@ class cli:
                 rc=None,
                 background_task=active_background_task
             )
-        else:
+        else:            
             proc.poll()
             return cli_output(
-                stdout=[line.strip().decode('ascii') for line in proc.stdout],
-                stderr=[line.strip().decode() for line in proc.stderr],
+                stdout=stdout_data.decode(),
+                stderr=stderr_data.decode(),
                 rc=proc.returncode,
                 background_task=None
             )
@@ -185,7 +187,6 @@ class backrest(cli):
     @staticmethod
     def info():
         out = cli._run_cmd(
-
             ["pgbackrest", "info", "--output=json"],  blocking=True)
         json_out = json.loads(''.join(out.stdout))
 
@@ -196,7 +197,7 @@ class backrest(cli):
         out = cli._run_cmd(
             ["pgbackrest", "start", "--stanza", stanza, ],  blocking=True)
         out = cli._run_cmd(
-            ["pgbackrest", "stanza-create", "--stanza", stanza, ],  blocking=True)
+            ["pgbackrest", "stanza-create", "--stanza", stanza, ],  blocking=True)        
         return (''.join(out.stdout), out.stderr, out.rc)
 
     @staticmethod
@@ -208,7 +209,21 @@ class backrest(cli):
         return (''.join(out.stdout), out.stderr, out.rc)
 
     @staticmethod
-    def backup(stanza):
+    def stanza_check(stanza):
         out = cli._run_cmd(
-            ["pgbackrest", "backup", "--stanza", stanza, "--start-fast", '--log-level-console=info'],  blocking=False)
-        return (''.join(out.stdout), out.stderr, out.rc)
+            ["pgbackrest", "check", "--stanza", stanza, '--log-level-console=info'],  blocking=True)        
+        return (out.rc, out.stdout, out.stderr)
+
+    @staticmethod
+    def backup(stanza,kind):
+        cmd=["pgbackrest", "backup", "--stanza", stanza, "--start-fast", '--log-level-console=info', f'--type={kind}']
+        out = cli._run_cmd(cmd,  blocking=True)
+        print(' '.join(cmd))
+        return out
+
+    @staticmethod
+    def list_backups(stanza):
+        out = cli._run_cmd(
+            ["pgbackrest", "info", "--stanza", stanza, '--log-level-console=info','--output=json'],  blocking=True)
+        json_out = json.loads(''.join(out.stdout))
+        return (json_out, out.stderr, out.rc)
