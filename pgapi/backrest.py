@@ -2,7 +2,6 @@ from pgapi.backupsolution import backupsolution
 from pgapi.cliclasses import backrest as backrest_cli, backrestconfig
 from logging import debug, log, info, warning, critical
 
-from pgapi.clusterCommands import cluster_get_all
 import pgapi.clusterCommands as cc
 
 from flask_restful import reqparse
@@ -46,20 +45,27 @@ class backrest(backupsolution):
             return abort(500, "Backupdetails not implemented")
         return out
 
-    def _take_backup(self, kind, cluster_identifier=None):
-        out = backrest_cli.backup(cluster_identifier, kind)
-        return out
+    def _take_backup(self, cluster_identifier,kind):
+        if not backrest_cli.check_systemd_bsf(kind, cluster_identifier):
+            backrest_cli.create_systemd_backupservice(kind, cluster_identifier)
+        service_state=backrest_cli.check_systemd_servicestate(cluster_identifier=cluster_identifier,kind=kind)
+        if service_state['SubState'] != 'running':
+            out = backrest_cli.backup(stanza=cluster_identifier, kind=kind)
+            ret = f"{kind}-Backup for {cluster_identifier} started at {out['ts_start']} ({out['pid']})"
+        else:
+            ret = f"{kind}-Backup for {cluster_identifier} already in progress ({service_state['MainPID']}))"    
+        return {'msg': ret}
 
     def _take_full_backup(self, cluster_identifier=None):
-        out = self._take_backup('full',cluster_identifier)
-        return {"stdout": out.stdout, "stderr": out.stderr}
+        out = self._take_backup(kind='full', cluster_identifier=cluster_identifier)
+        return out
 
     def _take_incremental_backup(self, cluster_identifier=None):
-        out = self._take_backup('incr',cluster_identifier)
-        return {"stdout": out.stdout, "stderr": out.stderr}
+        out = self._take_backup(kind='incr', cluster_identifier=cluster_identifier)
+        return out
 
     def _check_cluster(self, cluster_identifier):
-        (rc, stdout, stderr) = backrest_cli.stanza_check(cluster_identifier)        
+        (rc, stdout, stderr) = backrest_cli.stanza_check(cluster_identifier)
         if rc == 37:
             # Stanza does not exist
             warning(f"stdout: {stdout}\nstderr: {stderr}")
@@ -75,39 +81,38 @@ class backrest(backupsolution):
             warning(f"stdout: {stdout}\nstderr: {stderr}")
             return (rc, stdout, stderr)
 
-    def _add_archive_config(self, cluster_identifier):
+    def _add_archive_config(self, cluster_identifier, request_args):
         vn = cluster_identifier.split('-')
         version = vn[0]
         name = vn[1]
         (rc, stdout, stderr) = cc.cluster_set_setting(
             version, name, 'archive_mode', 'on')
-        warning(f"archive_mode on rc = {rc}")
         if rc == 0:
             (rc, stdout, stderr) = cc.cluster_set_setting(version, name, 'archive_command',
                                                           f'pgbackrest --stanza={cluster_identifier} archive-push %p')
-            warning(f"archive_command rc = {rc}")
             if rc == 0:
-                return {'rc': 0, 'stdout': f'You need to restart cluster {cluster_identifier}', 'stderr': ''}
+                if request_args['auto_restart'] and request_args['auto_restart'] in ["true", "True"]:
+                    (rc, stdout, stderr) = cc.cluster_ctl(
+                        version, name, action="restart")
+                    return {'rc': rc, "stdout": stdout, "stderr": stderr}
+                else:
+                    return {'rc': rc, 'stdout': f'You need to restart cluster {cluster_identifier}', 'stderr': stderr}
             else:
                 return abort(500, {rc, stdout, stderr})
         else:
             return abort(500, {rc, stdout, stderr})
 
-        # In case we want to restart the cluster automatically later
-        # (returncode, stdout, stderr) = cc.cluster_ctl(version, name, action="restart")
-        # log(f"out: {stdout} \nerr: {stderr}\n rc:{returncode}")
-
-    def add_cluster(self, cluster_identifier=None):
+    def add_cluster(self, cluster_identifier, request_args):
         try:
             data_dir = [instance['config']['data_directory']
-                        for instance in cluster_get_all()
+                        for instance in cc.cluster_get_all()
                         if instance['config']['cluster_name'] == cluster_identifier.replace('-', '/')][0]
         except LookupError:
             return abort(500, "Cluster does not exist")
 
         brc = backrestconfig()
         returnmsgs = []
-        (status,stdout, stderr) = self._check_cluster(cluster_identifier)
+        (status, stdout, stderr) = self._check_cluster(cluster_identifier)
         if status == 37:
             # Stanza does not exist
             debug(f"Datadir is {data_dir}")
@@ -117,18 +122,19 @@ class backrest(backupsolution):
             out = backrest_cli.stanza_create(cluster_identifier)
             returnmsgs.append({"stdout": out[0], "stderr": out[1]})
 
-            out = self._add_archive_config(cluster_identifier)            
+            out = self._add_archive_config(cluster_identifier, request_args)
             returnmsgs.append(out['stdout'])
         elif status == 87:
             # archive-mode = off
-            out = self._add_archive_config(cluster_identifier)
+            out = self._add_archive_config(cluster_identifier, request_args)
             returnmsgs.append(out['stdout'])
         elif status == 0:
             returnmsgs.append('Cluster already added')
         else:
             returnmsgs.append({'stdout': stdout, 'stderr': stderr})
 
-        return returnmsgs
+        return {'msg': ' / '.join(returnmsgs)}
+
     def remove_cluster(self, cluster_identifier=None):
         out = backrest_cli.stanza_delete(cluster_identifier)
         brc = backrestconfig()

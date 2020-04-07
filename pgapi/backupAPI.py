@@ -4,8 +4,6 @@ from flask_restful import Resource, reqparse
 import logging
 
 from pgapi.backrest import backrest as backup
-from pgapi.cliclasses import background_task
-
 
 """
     Backupimplementations share a common API, which makes them plugable via their
@@ -20,32 +18,18 @@ from pgapi.cliclasses import background_task
     As it is propably done with a configdriven factory, using a rewired backup directly
     should do no harm.
     """
+
+
 class _Activity(Resource):
-    def get(self,action_uuid=None, min_line=0):
-        out={}
-        logging.debug( action_uuid )
-        for active_task in background_task.active:
-            if action_uuid != None and active_task.uuid != action_uuid:
-                continue
-            logging.debug( active_task.uuid )
-            out[active_task.uuid] = {}
-            out[active_task.uuid]['stdout']=[]
-            out[active_task.uuid]['stderr']=[]
-            out[active_task.uuid]['process']=active_task.label
-            out[active_task.uuid]['rc']= active_task.rc
-            for line in active_task.stdout.get_new_lines(min_line):
-                out[active_task.uuid]['stdout'].append(str(line))
-            for line in active_task.stderr.get_new_lines(min_line):
-                out[active_task.uuid]['stderr'].append( str(line) )
+    def get(self, action_uuid=None, min_line=0):
+        out = {'msg':'Not implemented yet'}
         return jsonify(out)
 
 class _Backup(Resource):
-    def get(self, cluster_identifier=None, backup_identifier=None):
+    def get(self, cluster_identifier=None, action=None):
         try:
             logging.info("GET Request for Backups")
             out = None
-            if backup_identifier:
-                out = backup().list_backups(backup_identifier=backup_identifier)
             if cluster_identifier:
                 out = backup().list_backups(cluster_identifier=cluster_identifier)
             else:
@@ -55,23 +39,26 @@ class _Backup(Resource):
         except Exception as e:
             return abort(500, str(e))
 
-    def put(self, cluster_identifier=None, backup_kind=None):
-        """PUT creates a cluster or starts a backup.
-        To be somewhat REST compliant, it is of no relevance what
-        exactly we PUT to as /backupidentifier."""       
-        out = None        
-        backup_kind=request.args.get('kind')
-        if (cluster_identifier and not backup_kind):
-            out = backup().add_cluster(cluster_identifier)
-        elif (backup_kind):            
-            out = backup().take_backup(cluster_identifier=cluster_identifier, kind=backup_kind)
+    def put(self, cluster_identifier=None,action=None):
+        """PUT creates a cluster or starts a backup"""
+
+        out = None
+        # cluster_identifier='11-main'
+        if action == 'prepare':        
+            out = backup().add_cluster(cluster_identifier=cluster_identifier,request_args=request.args)
+        elif action == 'full':
+            out = backup().take_backup(kind='full',cluster_identifier=cluster_identifier)
+        elif action == 'incremental':
+            out = backup().take_backup(kind='incremental',cluster_identifier=cluster_identifier)
+        else:
+            out={"msg":"supported actions: prepare, full, incremental"}
         return jsonify(str(out))
 
     def delete(self, cluster_identifier=None, backup_identifier=None):
         logging.info("DELETE Request for Backups")
         if backup_identifier:
             raise NotImplementedError
-            # delete a backup            
+            # delete a backup
             # return jsonify( out )
         elif cluster_identifier:
             out = backup().remove_cluster(cluster_identifier)
@@ -81,17 +68,22 @@ class _Backup(Resource):
         # return jsonify(backups)
 
 
-# cluster_identifier='11-main'
+
 # backup_identifier=$Timestamp
 
 def registerHandlers(api):
-    api.add_resource(_Activity, '/backup_activity/', endpoint="backup_activity")
-    api.add_resource(_Activity, '/backup_activity/<string:action_uuid>/', endpoint="backup_activity_uuid")
-    api.add_resource(_Activity, '/backup_activity/<string:action_uuid>/<int:min_line>/', endpoint="backup_activity_uuid_min_line")
+    api.add_resource(_Activity, '/backup_activity/',
+                     endpoint="backup_activity")
+    api.add_resource(_Activity, '/backup_activity/<string:action_uuid>/',
+                     endpoint="backup_activity_uuid")
+    api.add_resource(_Activity, '/backup_activity/<string:action_uuid>/<int:min_line>/',
+                     endpoint="backup_activity_uuid_min_line")
 
     api.add_resource(_Backup, '/backup/', endpoint="backup")
     api.add_resource(_Backup, '/backup/<string:cluster_identifier>',
                      endpoint="backup_cluster_identifier")
-    
-    #api.add_resource(_Backup, '/backup/<string:cluster_identifier>',
-                     #endpoint="backup_cluster_identifier_backup_kind")
+    api.add_resource(_Backup, '/backup/<string:cluster_identifier>/<string:action>',
+                     endpoint="backup_cluster_identifier_action")
+
+    # api.add_resource(_Backup, '/backup/<string:cluster_identifier>',
+    # endpoint="backup_cluster_identifier_backup_kind")

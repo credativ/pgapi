@@ -68,18 +68,18 @@ class backupsolution:
     def _remove_logical_backup(self, backup_identifier=None):
         backupsolution._warn_not_implemented("_remove_logical_backup")
 
-    def take_backup(self, kind='full', cluster_identifier=None,  backup_identifier=None):
+    def take_backup(self, kind, cluster_identifier=None,  backup_identifier=None):
         """Currently 3 Kinds of backups are supported:
             * full - full physical
             * incremental - incremental physical
             * logical - logical
         """
         if kind == 'full':
-            self._take_full_backup(cluster_identifier)
+            return self._take_full_backup(cluster_identifier)
         elif kind == 'incremental':
-            self._take_incremental_backup(cluster_identifier)
+            return self._take_incremental_backup(cluster_identifier)
         elif kind == 'logical':
-            self._take_logical_backup(cluster_identifier)
+            return self._take_logical_backup(cluster_identifier)
         else:
             backupsolution._warn_not_implemented(f"undefined backupmethod {kind}")
 

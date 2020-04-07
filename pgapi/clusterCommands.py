@@ -9,6 +9,10 @@ import logging
 import traceback
 import shutil
 import time
+import logging
+
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.INFO)
 
 from pgapi import helper
 
@@ -201,7 +205,7 @@ def cluster_set_setting(version, name, setting, value):
            name,
            "set",
             setting,
-            value]
+            value]    
     return _run_command(cmd)
 
 def pgcontroldata_get ( pgdata, version ):

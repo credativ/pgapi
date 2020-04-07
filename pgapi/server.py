@@ -2,6 +2,8 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from importlib import import_module
 from pgapi.helper import Config
+from waitress import serve
+
 
 class ServerAPI(object):
 
@@ -48,3 +50,4 @@ class ServerAPI(object):
             ssl = None
             
         self.server_app.run(debug=debug, host=host, port=port, ssl_context=ssl)
+        #serve(self.server_app, host=host, port=port)

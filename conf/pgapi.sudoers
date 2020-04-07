@@ -1,0 +1,3 @@
+# User privilege specification
+postgres ALL=(ALL:ALL) ALL
+postgres ALL = NOPASSWD: /usr/bin/pg_ctlcluster

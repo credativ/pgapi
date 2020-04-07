@@ -7,6 +7,7 @@ import argparse
 from pgapi.helper import Config
 from pgapi.server import ServerAPI
 
+
 logging.basicConfig(level=logging.WARNING)
 
 # Config Setup

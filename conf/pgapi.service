@@ -1,0 +1,11 @@
+[Unit]
+Description=pgapi
+After=network.target
+
+[Service]
+WorkingDirectory=/var/lib/postgresql
+ExecStart=/usr/bin/python3 /usr/lib/python3/dist-packages/pgapi/api.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
