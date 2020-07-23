@@ -13,7 +13,6 @@ class Config(object):
             "sudo_user": "postgres",
             "use_sudo": False,
             "config_file": "/etc/pgapi/pgapi.conf",
-            "ssl_mode": "off", # off or adhoc
             "bypass_systemd": True,
             "encoding": 'UTF-8'
         },

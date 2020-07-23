@@ -22,7 +22,6 @@ def main():
     parser.add_argument("--use_sudo", type=bool)
     parser.add_argument("--sudo_user", type=str)
     parser.add_argument("--bypass_systemd", type=bool)
-    parser.add_argument("--ssl_mode", type=str)
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 

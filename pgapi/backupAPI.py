@@ -31,7 +31,10 @@ class _Backup(Resource):
             logging.info("GET Request for Backups")
             out = None
             if cluster_identifier:
-                out = backup().list_backups(cluster_identifier=cluster_identifier)
+                if 'pid' in request.args:                    
+                    out = backup().backuplog_pid(cluster_identifier=cluster_identifier,pid=request.args['pid'])
+                else:
+                    out = backup().list_backups(cluster_identifier=cluster_identifier)
             else:
                 out = backup().list_backups()
             #out = { **out, **({"info":backup().info()}) }

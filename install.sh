@@ -34,4 +34,7 @@ cp conf/pgapi.service ~postgres/.config/systemd/user/
 chown -R postgres.postgres ~postgres/.config/systemd
 ln -s /var/lib/postgresql/.config/systemd/user/multi-user.target.wants/pgapi.service /var/lib/postgresql/.config/systemd/user/pgapi.service.
 
+# enable journald for postgres-user
+usermod -a -G systemd-journal postgres
+
 systemctl --user enable pgapi

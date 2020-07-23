@@ -11,8 +11,7 @@ class ServerAPI(object):
     server_app = None
     server_api = None
 
-    __api_modules = ["clusterAPI", "systemAPI","backupAPI"]
-    #__modules = ["clusterAPI"]
+    __api_modules = ["clusterAPI", "systemAPI","backupAPI"]    
 
     def registerHandler(self):
         """Register all modules as well as some special handler."""
@@ -39,15 +38,9 @@ class ServerAPI(object):
         return (self.server_app, self.server_api)
 
     def start(self):
-        """Start the server."""
-        debug = self._config.getSetting("debug")
-        port = self._config.getSetting("port")
-        ssl_mode = self._config.getSetting("ssl_mode")
+        """Start the server."""             
+        port = self._config.getSetting("port")        
         host = self._config.getSetting("listen_address")
-        if ssl_mode == "adhoc":
-            ssl = "adhoc"
-        else:
-            ssl = None
-            
-        self.server_app.run(debug=debug, host=host, port=port, ssl_context=ssl)
-        #serve(self.server_app, host=host, port=port)
+
+        # https://docs.pylonsproject.org/projects/waitress/en/stable/arguments.html                    
+        serve(self.server_app, host=host, port=port, ident='pgapi',trusted_proxy='127.0.0.1')

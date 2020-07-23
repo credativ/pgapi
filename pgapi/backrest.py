@@ -1,11 +1,12 @@
-from pgapi.backupsolution import backupsolution
-from pgapi.cliclasses import backrest as backrest_cli, backrestconfig
-from logging import debug, log, info, warning, critical
+from logging import critical, debug, info, log, warning
+from re import match
 
 import pgapi.clusterCommands as cc
-
+from flask import abort, jsonify
 from flask_restful import reqparse
-from flask import jsonify, abort
+from pgapi.backupsolution import backupsolution
+from pgapi.cliclasses import backrest as backrest_cli
+from pgapi.cliclasses import backrestconfig
 
 
 class backrest(backupsolution):
@@ -44,6 +45,19 @@ class backrest(backupsolution):
         elif backup_identifier:
             return abort(500, "Backupdetails not implemented")
         return out
+
+    def backuplog_pid(self,cluster_identifier,pid):
+        try:
+            if int(pid) > 0:            
+                out=backrest_cli.backuplog_pid(pid)                
+                if match(f'.*{cluster_identifier}.*',out.stdout[1]):
+                    return {'msg': out.stdout}
+                else:
+                    return {'msg':f'PID {pid} was no backup process for {cluster_identifier}'}
+        except ValueError:        
+            return {'msg':f'No Backuplog for PID {pid} found'}
+
+
 
     def _take_backup(self, cluster_identifier,kind):
         if not backrest_cli.check_systemd_bsf(kind, cluster_identifier):
@@ -90,8 +104,8 @@ class backrest(backupsolution):
         if rc == 0:
             (rc, stdout, stderr) = cc.cluster_set_setting(version, name, 'archive_command',
                                                           f'pgbackrest --stanza={cluster_identifier} archive-push %p')
-            if rc == 0:
-                if request_args['auto_restart'] and request_args['auto_restart'] in ["true", "True"]:
+            if rc == 0:                              
+                if 'auto_restart' in request_args and request_args['auto_restart'] in ["true", "True"]:
                     (rc, stdout, stderr) = cc.cluster_ctl(
                         version, name, action="restart")
                     return {'rc': rc, "stdout": stdout, "stderr": stderr}

@@ -135,6 +135,13 @@ class backrest(cli):
         return (json_out, out.stderr, out.rc)
 
     @staticmethod
+    def backuplog_pid(pid):
+        out = cli._run_cmd(
+            ['sudo','journalctl',f'_PID={pid}']
+        )
+        return out
+
+    @staticmethod
     def check_systemd_servicestate(kind, cluster_identifier):
         out = cli._run_cmd(["systemctl", "--user", "--no-page",
                             "show", f'{cluster_identifier}-{kind}-backupjob'])
