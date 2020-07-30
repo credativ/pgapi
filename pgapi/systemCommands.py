@@ -39,14 +39,16 @@ def get_system_info(section=None):
         system_info[section] = sections[section]()
 
     return system_info
-    
+
+
 def get_hostname():
     hostname = {}
 
     hostname["hostname"] = socket.gethostname()
     hostname["fqdn"] = socket.getfqdn()
-    
+
     return hostname
+
 
 def get_uname():
     (kernel_name, nodename, kernel_release, kernel_version, machine) = os.uname()
@@ -56,11 +58,13 @@ def get_uname():
              "kernel_release": kernel_release,
              "kernel_version": kernel_version,
              "machine": machine
-            }
+             }
     return uname
+
 
 def get_installed_postgresql_versions():
     return helper.get_installed_postgresql_versions()
+
 
 def get_cpu_config():
     cpu_config = {}
@@ -70,18 +74,22 @@ def get_cpu_config():
 
     return cpu_config
 
+
 def get_disk_partitions():
     disk_partitions = psutil.disk_partitions()
 
     return disk_partitions
+
 
 def _get_mount_points():
     mount_points = [x.mountpoint for x in psutil.disk_partitions()]
 
     return mount_points
 
+
 def _get_disk_usage_single_mountpoint(mountpoint):
     return psutil.disk_usage(mountpoint)
+
 
 def get_disk_usage():
     mount_points = _get_mount_points()
@@ -92,11 +100,14 @@ def get_disk_usage():
 
     return disk_usage
 
+
 def get_virtual_memory():
     return psutil.virtual_memory()
 
+
 def get_swap_memory():
     return psutil.swap_memory()
+
 
 def get_load():
     (load_1min, load_5min, load_15min) = os.getloadavg()
@@ -104,5 +115,5 @@ def get_load():
     load = {"1min": load_1min,
             "5min": load_5min,
             "15min": load_15min
-           }
+            }
     return load

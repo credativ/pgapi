@@ -14,7 +14,8 @@ class Config(object):
             "use_sudo": False,
             "config_file": "/etc/pgapi/pgapi.conf",
             "bypass_systemd": True,
-            "encoding": 'UTF-8'
+            "encoding": 'UTF-8',
+            "tmate_config": '/etc/tmate.conf'
         },
         "file": {},
         "arguments": {}

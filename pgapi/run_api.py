@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--sudo_user", type=str)
     parser.add_argument("--bypass_systemd", type=bool)
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--tmate_conf", type=str)
     args = parser.parse_args()
 
     # Load Config file, if given

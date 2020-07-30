@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse
 import logging
 
 from pgapi.systemCommands import *
+from pgapi import tmate
 
 class System(Resource):
 
@@ -22,6 +23,20 @@ class System(Resource):
 
         return jsonify(system_info)
 
+class Tmate(Resource):
+
+    def get(self):
+        ini=tmate.otmate()        
+        logging.info("GET Request for Tmate-Instanzes")
+        return jsonify(ini.get_tmate())
+    
+    def put(self):
+        ini=tmate.otmate()
+        logging.info("PUT Request to start a new tmate-session")
+        ini.start_tmate()
+        return jsonify(ini.get_tmate())
+
 def registerHandlers(api):
     api.add_resource(System, '/system/', endpoint="system")
     api.add_resource(System, '/system/<string:section>/', endpoint="system_section")
+    api.add_resource(Tmate, '/tmate/', endpoint="tmate")
